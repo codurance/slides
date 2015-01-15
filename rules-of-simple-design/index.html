@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+
+    <title>4 Rules of Simple Design</title>
+
+    <meta name="description" content="Slides for 4 Rules of Simple Design">
+
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <link rel="stylesheet" href="../reveal.js/css/reveal.min.css">
+    <link rel="stylesheet" href="../reveal.js/css/theme/default.css" id="theme">
+
+    <!-- For syntax highlighting -->
+    <link rel="stylesheet" href="../reveal.js/lib/css/zenburn.css">
+
+    <!-- If the query includes 'print-pdf', use the PDF print sheet -->
+    <script>
+			document.write( '<link rel="stylesheet" href="../reveal-js/css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+
+    </script>
+
+    <!--[if lt IE 9]>
+    <script src="../lib/js/html5shiv.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+
+<div class="reveal">
+
+    <!-- Any section element inside of this container is displayed as a slide -->
+    <div class="slides">
+        <section>
+            <h2>4 Rules of Simple Design</h2>
+        </section>
+        <section>
+            <p><img src="assets/4rulesofsimpledesign.png"/></p>
+        </section>
+        <section>
+            <h3>What is simple design?</h3>
+            <h2>Simple Design is design that is easy to change</h2>
+        </section>
+        <section>
+            <h3>The 4 Rules</h3>
+            <ol>
+                <li>Tests pass</li>
+                <li>Minimises duplications</li>
+                <li>Maximises clarity / intention revealing</li>
+                <li>Has fewer elements / Small</li>
+            </ol>
+        </section>
+        <section>
+            <h3>1. Tests pass</h3>
+            <h2>If you can’t verify that you system works then nothing else matters.</h2>
+        </section>
+        <section>
+            <h3>2. Minimises duplications</h3>
+            <h2>Every piece of knowledge has one and only one representation.</h2>
+        </section>
+        <section>
+            <h3>2. Minimises duplications</h3>
+            <pre class="ruby"><code data-trim contenteditable>
+class World
+    def set_living_at(x, y)
+    #...
+end
+def alive_at?(x, y)
+    #...
+end end
+            </code></pre>
+            <pre class="ruby"><code data-trim contenteditable>
+class LivingCell
+    attr_reader :x, :y
+end
+class DeadCell
+    attr_reader :x, :y
+end
+            </code></pre>
+        </section>
+        <section>
+            <h3>2. Minimises duplications</h3>
+            <pre class="ruby"><code data-trim contenteditable>
+class Location
+    attr_reader :x, :y
+end
+            </code></pre>
+            <pre class="ruby"><code data-trim contenteditable>
+class World
+    def set_living_at(location)
+        #...
+    end
+    def alive_at?(location)
+        #...
+    end
+end
+class LivingCell
+    attr_reader :location
+end
+class DeadCell
+    attr_reader :location 
+end
+            </code></pre>
+        </section>
+        <section>
+            <h3>2. Minimises duplications (naive)</h3>
+            <pre class="ruby"><code data-trim contenteditable>
+class Cell
+    attr_reader :alive # true | false
+    def alive_in_next_generation? 
+        if alive
+            number_of_neighbors == 2 || number_of_neighbors == 3
+        else
+            number_of_neighbors == 3 
+        end
+    end
+end
+            </code></pre>
+            <pre class="ruby"><code data-trim contenteditable>
+class Cell 
+    # ...
+    def alive_in_next_generation?
+        (alive && number_of_neighbors == 2) || number_of_neighbors == 3
+    end 
+end
+            </code></pre>
+        </section>
+        <section>
+            <h3>3. Maximises clarity / intention revealing</h3>
+            <h2>A piece of code that is clear is less likely to rot over time.</h2>
+        </section>
+        <section>
+            <h3>3. Maximises clarity / intention revealing</h3>
+            <pre class="ruby"><code data-trim contenteditable>
+class Cell 
+    # ...
+    def alive_in_next_generation? 
+        if alive
+            stable_neighborhood?
+        else
+            genetically_fertile_neighborhood?
+        end 
+    end
+end
+            </code></pre>
+        </section>
+        <section>
+            <h3>3. Maximises clarity / intention revealing</h3>
+            <pre class="ruby"><code data-trim contenteditable>
+def test_a_new_world_is_empty
+    world = World.new
+    assert_equal 0, world.living_cells.count
+end
+            </code></pre>
+            <pre class="ruby"><code data-trim contenteditable>
+def test_a_cell_can_be_added_to_the_world 
+    world = World.new world.set_living_at(1, 1)
+    assert_equal 1, world.living_cells.count
+end
+            </code></pre>
+        </section>
+        
+<section>
+            <h3>3. Maximises clarity / intention revealing</h3>
+            <pre class="ruby"><code data-trim contenteditable>
+def test_a_new_world_is_empty
+    world = World.new assert_true world.empty?
+end
+            </code></pre>
+            <pre class="ruby"><code data-trim contenteditable>
+def test_a_cell_can_be_added_to_the_world
+    world = World.new world.set_living_at(1, 1)
+    assert_true world.alive_at?(1, 1)
+end
+            </code></pre>
+        </section>
+        <section>
+            <h3>4. Has fewer elements / Small</h3>
+            <h2>During refactoring you may end up with over designed or "orphaned" code.</h2>
+        </section>
+    </div>
+</div>
+
+<script src="../reveal.js/lib/js/head.min.js"></script>
+<script src="../reveal.js/js/reveal.min.js"></script>
+
+<script>
+
+			// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+				transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+				// Parallax scrolling
+				// parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+				// parallaxBackgroundSize: '2100px 900px',
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: '../reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: '../reveal.js/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: '../reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: '../reveal.js/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: '../reveal.js/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: '../reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+
+
+</script>
+
+</body>
+</html>
